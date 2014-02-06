@@ -72,7 +72,11 @@ PRODUCT_COPY_FILES += \
 	hardware/broadcom/wlan/firmware/ap6210/fw_bcm40181a2_p2p.bin:system/vendor/modules/fw_bcm40181a2_p2p.bin \
 	hardware/broadcom/wlan/firmware/ap6210/nvram_ap6210.txt:system/vendor/modules/nvram_ap6210.txt \
 	hardware/broadcom/wlan/firmware/ap6210/bcm20710a1.hcd:system/vendor/modules/bcm20710a1.hcd
-	
+
+# copy key.apk for updater install external apk signature key
+PRODUCT_COPY_FILES += \
+	device/softwinner/wing-k70/key.apk:system/vendor/key.apk	
+
 PRODUCT_PROPERTY_OVERRIDES += \
   dalvik.vm.heapsize=80m \
   persist.sys.usb.config=mass_storage,adb \
