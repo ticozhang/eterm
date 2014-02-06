@@ -8,7 +8,7 @@ public class BusyIoPin {
 	private static final String BUSY_IO_PIN = "/sys/class/gpio/gpio214/value";
 	private static FileOutputStream fos = null;
 
-	/* Error */
+	
 	public static boolean setPinValue(int value) {
 		if (fos == null) {
 			try {
