@@ -890,7 +890,7 @@ public class KeyguardViewMediator {
         }
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
-        showLocked(options);
+        //showLocked(options);//tico remove screen lock
     }
 
     /**

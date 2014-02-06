@@ -40,6 +40,9 @@ PRODUCT_PACKAGES += \
 	u3gmonitor \
 	rild \
 	chat \
+	TSCalibration2 \
+	Home2 \
+	Updater \
 	libjni_pinyinime \
 	libsrec_jni \
 

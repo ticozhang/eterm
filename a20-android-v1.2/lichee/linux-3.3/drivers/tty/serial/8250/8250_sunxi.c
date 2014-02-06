@@ -279,7 +279,12 @@ static void
 sw_serial_pm(struct uart_port *port, unsigned int state,
              unsigned int oldstate)
 {
-    struct sw_serial_port *up = sw_serial_uart[port->irq - AW_IRQ_UART0];
+    struct sw_serial_port *up;
+
+    if (port->irq >= AW_IRQ_UART4)
+        up = sw_serial_uart[port->irq - AW_IRQ_UART4 + 4];
+    else
+        up = sw_serial_uart[port->irq - AW_IRQ_UART0];
 
     if (!state) {
         clk_enable(up->bus_clk);

@@ -187,8 +187,33 @@ static struct i2c_driver bq32k_driver = {
 	.id_table	= bq32k_id,
 };
 
+//自定义boardinfo信息  
+static struct i2c_board_info bq32k_board_info[] __initdata = {  
+    {  
+        I2C_BOARD_INFO("bq32000", 0xD0>>1),  //设备名称和地址(很关键)  
+        .platform_data= NULL,    // 传递私有数据，赋值给client->dev->platform_data  
+    },  
+};  
+  
+
 static __init int bq32k_init(void)
 {
+	struct i2c_client* client;
+	struct i2c_adapter* adap = i2c_get_adapter(1);
+	if(adap == NULL){
+		printk("get adapter fail\n");
+		return -1;
+	}
+
+	client = i2c_new_device(adap, &bq32k_board_info[0]);
+	if(client == NULL){
+		printk("new i2c client device fail\n");
+		i2c_put_adapter(adap);
+		return -1;
+	}
+
+	i2c_put_adapter(adap);
+
 	return i2c_add_driver(&bq32k_driver);
 }
 module_init(bq32k_init);

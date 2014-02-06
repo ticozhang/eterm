@@ -1556,20 +1556,11 @@ static int __init sunxi_ts_init(void)
 	dprintk(DEBUG_INIT, "sunxi-ts.c: sunxi_ts_init: start ...\n");
 
 	type = script_get_item("rtp_para", "rtp_used", &val);
-
- 	if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
-		pr_err("%s: type err  rtp_used = %d. \n", __func__, val.val);
-		goto script_get_err;
-	}
-	device_used = val.val;
 	
-	if (1 == device_used) {
-		type = script_get_item("rtp_para", "rtp_screen_size", &val);
-		if(SCIRPT_ITEM_VALUE_TYPE_INT  != type){
-	        pr_err("sunxi_ts_init: script_get err. \n");
-	        goto script_get_err;
-		}
-		tp_screen_size = val.val;
+	//:> Tico add insmod support for no script
+	if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
+		device_used = 1;  // rtp_used: 0 to disable; 1 to enable
+		tp_screen_size = 8; // rtp_screen_size: diagonal screen size rounded to full inches
 		printk("sunxi-ts: tp_screen_size is %d inch.\n", tp_screen_size);
 		if (7 == tp_screen_size) {
 			dual_touch_distance = 20;
@@ -1579,44 +1570,31 @@ static int __init sunxi_ts_init(void)
 			dual_touch_distance = 35;
 			glide_delta_ds_max_limit = 150;
 			tp_regidity_level = 5;
+		}else if(8 == tp_screen_size) {
+			dual_touch_distance = 10;
+			glide_delta_ds_max_limit = 60;
+			tp_regidity_level = 8;
 		} else {
 			pr_err("sunxi-ts: tp_screen_size is not supported. \n");
 			goto script_get_err;
 		}
-
-		type = script_get_item("rtp_para", "rtp_regidity_level", &val);
-		if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
-			pr_err("sunxi_ts_init: script_get err rtp_regidity_level. \n");
-			goto script_get_err;
-		}
-		tp_regidity_level = val.val;
+		
+		//tp_regidity_level = 8; // rtp_regidity_level: touchscreen regidty in 10 ms units
 		printk("sunxi-ts: tp_regidity_level is %d.\n", tp_regidity_level);
-
 		if (tp_regidity_level < 2 || tp_regidity_level > 10) {
 			printk("sunxi-ts: only tp_regidity_level between 2 and 10  is supported. \n");
 			goto script_get_err;
 		}
-
-		type = script_get_item("rtp_para", "rtp_press_threshold_enable", &val);
-		if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
-			pr_err("sunxi_ts_init: script_get err rtp_press_threshold_enable. \n");
-			goto script_get_err;
-		}
-		tp_press_threshold_enable = val.val;
+		
+		tp_press_threshold_enable = 1;
 		printk("sunxi-ts: tp_press_threshold_enable is %d.\n", tp_press_threshold_enable);
-
 		if(0 != tp_press_threshold_enable  && 1 != tp_press_threshold_enable) {
 			printk("sunxi-ts: only tp_press_threshold_enable  0 or 1  is supported. \n");
 			goto script_get_err;
 		}
-
+		
 		if (1 == tp_press_threshold_enable) {
-			type = script_get_item("rtp_para", "rtp_press_threshold", &val);
-			if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
-				pr_err("sunxi_ts_init: script_get err rtp_press_threshold. \n");
-				goto script_get_err;
-			}
-			tp_press_threshold = val.val;
+			tp_press_threshold = 0x1f40;
 			printk("sunxi-ts: rtp_press_threshold is %d.\n", tp_press_threshold);
 
 			if(tp_press_threshold < 0 || tp_press_threshold > 0xFFFFFF) {
@@ -1625,33 +1603,193 @@ static int __init sunxi_ts_init(void)
 			}
 		}
 		
-		type = script_get_item("rtp_para", "rtp_sensitive_level", &val);
-		if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
-			pr_err("sunxi_ts_init: script_get err rtp_sensitive_level. \n");
-			goto script_get_err;
-		}
-		tp_sensitive_level = val.val;
+		tp_sensitive_level = 0xf;
 		printk("sunxi-ts: rtp_sensitive_level is %d.\n", tp_sensitive_level);
-
 		if (tp_sensitive_level < 0 || tp_sensitive_level > 0xf) {
 			printk("sunxi-ts: only tp_regidity_level between 0 and 0xf  is supported. \n");
 			goto script_get_err;
 		}
-
-		type = script_get_item("rtp_para", "rtp_exchange_x_y_flag", &val);	    
-		if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
-			pr_err("sunxi_ts_init: script_get err rtp_exchange_x_y_flag. \n");
-			goto script_get_err;
-		}
-		tp_exchange_x_y = val.val;
+		
+		tp_exchange_x_y = 0;
 		printk("sunxi-ts: rtp_exchange_x_y_flag is %d.\n", tp_exchange_x_y);
-
 		if (0 != tp_exchange_x_y && 1 != tp_exchange_x_y) {
 			printk("sunxi-ts: only tp_exchange_x_y==1 or  tp_exchange_x_y==0 is supported. \n");
 			goto script_get_err;
 		}
-	            
+	}else{
+	//we found script
+		device_used = val.val;
+		
+		if (1 == device_used) {
+			type = script_get_item("rtp_para", "rtp_screen_size", &val);
+			if(SCIRPT_ITEM_VALUE_TYPE_INT  != type){
+				pr_err("sunxi_ts_init: script_get err. \n");
+				goto script_get_err;
+			}
+			tp_screen_size = val.val;
+			printk("sunxi-ts: tp_screen_size is %d inch.\n", tp_screen_size);
+			if (8 == tp_screen_size) {
+				dual_touch_distance = 10;
+				glide_delta_ds_max_limit = 60;
+				tp_regidity_level = 8;
+			}else if (7 == tp_screen_size) {
+				dual_touch_distance = 20;
+				glide_delta_ds_max_limit = 90;
+				tp_regidity_level = 7;
+			}else if(5 == tp_screen_size) {
+				dual_touch_distance = 35;
+				glide_delta_ds_max_limit = 150;
+				tp_regidity_level = 5;
+			} else {
+				pr_err("sunxi-ts: tp_screen_size is not supported. \n");
+				goto script_get_err;
+			}
+
+			type = script_get_item("rtp_para", "rtp_regidity_level", &val);
+			if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
+				pr_err("sunxi_ts_init: script_get err rtp_regidity_level. \n");
+				goto script_get_err;
+			}
+			tp_regidity_level = val.val;
+			printk("sunxi-ts: tp_regidity_level is %d.\n", tp_regidity_level);
+
+			if (tp_regidity_level < 2 || tp_regidity_level > 10) {
+				printk("sunxi-ts: only tp_regidity_level between 2 and 10  is supported. \n");
+				goto script_get_err;
+			}
+
+			type = script_get_item("rtp_para", "rtp_press_threshold_enable", &val);
+			if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
+				pr_err("sunxi_ts_init: script_get err rtp_press_threshold_enable. \n");
+				goto script_get_err;
+			}
+			tp_press_threshold_enable = val.val;
+			printk("sunxi-ts: tp_press_threshold_enable is %d.\n", tp_press_threshold_enable);
+
+			if(0 != tp_press_threshold_enable  && 1 != tp_press_threshold_enable) {
+				printk("sunxi-ts: only tp_press_threshold_enable  0 or 1  is supported. \n");
+				goto script_get_err;
+			}
+
+			if (1 == tp_press_threshold_enable) {
+				type = script_get_item("rtp_para", "rtp_press_threshold", &val);
+				if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
+					pr_err("sunxi_ts_init: script_get err rtp_press_threshold. \n");
+					goto script_get_err;
+				}
+				tp_press_threshold = val.val;
+				printk("sunxi-ts: rtp_press_threshold is %d.\n", tp_press_threshold);
+
+				if(tp_press_threshold < 0 || tp_press_threshold > 0xFFFFFF) {
+					printk("sunxi-ts: only tp_regidity_level between 0 and 0xFFFFFF  is supported. \n");
+					goto script_get_err;
+				}
+			}
+			
+			type = script_get_item("rtp_para", "rtp_sensitive_level", &val);
+			if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
+				pr_err("sunxi_ts_init: script_get err rtp_sensitive_level. \n");
+				goto script_get_err;
+			}
+			tp_sensitive_level = val.val;
+			printk("sunxi-ts: rtp_sensitive_level is %d.\n", tp_sensitive_level);
+
+			if (tp_sensitive_level < 0 || tp_sensitive_level > 0xf) {
+				printk("sunxi-ts: only tp_regidity_level between 0 and 0xf  is supported. \n");
+				goto script_get_err;
+			}
+
+			type = script_get_item("rtp_para", "rtp_exchange_x_y_flag", &val);	    
+			if (SCIRPT_ITEM_VALUE_TYPE_INT  != type) {
+				pr_err("sunxi_ts_init: script_get err rtp_exchange_x_y_flag. \n");
+				goto script_get_err;
+			}
+			tp_exchange_x_y = val.val;
+			printk("sunxi-ts: rtp_exchange_x_y_flag is %d.\n", tp_exchange_x_y);
+
+			if (0 != tp_exchange_x_y && 1 != tp_exchange_x_y) {
+				printk("sunxi-ts: only tp_exchange_x_y==1 or  tp_exchange_x_y==0 is supported. \n");
+				goto script_get_err;
+			}
+					
+		} else {
+			goto script_get_err;
+		}
+	}
+
+		
+	platform_device_register(&sunxi_ts_device);
+	ret = platform_driver_register(&sunxi_ts_driver);
+
+script_get_err:
+	return ret;
+}
+
+#if 0
+static int __init sunxi_ts_init(void)
+{
+	int device_used = 0;
+	int ret = -1;
+	/* get the config para */
+	int tp_screen_size = 0;
+     
+	printk("sunxi-ts.c: sunxi_ts_init: start ...\n");
+
+	device_used = 1;  // rtp_used: 0 to disable; 1 to enable
+	tp_screen_size = 8; // rtp_screen_size: diagonal screen size rounded to full inches
+	printk("sunxi-ts: tp_screen_size is %d inch.\n", tp_screen_size);
+	if (7 == tp_screen_size) {
+		dual_touch_distance = 20;
+		glide_delta_ds_max_limit = 90;
+		tp_regidity_level = 7;
+	}else if(5 == tp_screen_size) {
+		dual_touch_distance = 35;
+		glide_delta_ds_max_limit = 150;
+		tp_regidity_level = 5;
+	}else if(8 == tp_screen_size) {
+		dual_touch_distance = 10;
+		glide_delta_ds_max_limit = 60;
+		tp_regidity_level = 8;
 	} else {
+		pr_err("sunxi-ts: tp_screen_size is not supported. \n");
+		goto script_get_err;
+	}
+	
+	//tp_regidity_level = 8; // rtp_regidity_level: touchscreen regidty in 10 ms units
+	printk("sunxi-ts: tp_regidity_level is %d.\n", tp_regidity_level);
+	if (tp_regidity_level < 2 || tp_regidity_level > 10) {
+		printk("sunxi-ts: only tp_regidity_level between 2 and 10  is supported. \n");
+		goto script_get_err;
+	}
+	
+	tp_press_threshold_enable = 1;
+	printk("sunxi-ts: tp_press_threshold_enable is %d.\n", tp_press_threshold_enable);
+	if(0 != tp_press_threshold_enable  && 1 != tp_press_threshold_enable) {
+		printk("sunxi-ts: only tp_press_threshold_enable  0 or 1  is supported. \n");
+		goto script_get_err;
+	}
+	
+	if (1 == tp_press_threshold_enable) {
+		tp_press_threshold = 0x1f40;
+		printk("sunxi-ts: rtp_press_threshold is %d.\n", tp_press_threshold);
+
+		if(tp_press_threshold < 0 || tp_press_threshold > 0xFFFFFF) {
+			printk("sunxi-ts: only tp_regidity_level between 0 and 0xFFFFFF  is supported. \n");
+			goto script_get_err;
+		}
+	}
+	
+	tp_sensitive_level = 0xf;
+	printk("sunxi-ts: rtp_sensitive_level is %d.\n", tp_sensitive_level);
+	if (tp_sensitive_level < 0 || tp_sensitive_level > 0xf) {
+		printk("sunxi-ts: only tp_regidity_level between 0 and 0xf  is supported. \n");
+		goto script_get_err;
+	}
+	
+	tp_exchange_x_y = 0;
+	printk("sunxi-ts: rtp_exchange_x_y_flag is %d.\n", tp_exchange_x_y);
+	if (0 != tp_exchange_x_y && 1 != tp_exchange_x_y) {
+		printk("sunxi-ts: only tp_exchange_x_y==1 or  tp_exchange_x_y==0 is supported. \n");
 		goto script_get_err;
 	}
 		
@@ -1661,6 +1799,7 @@ static int __init sunxi_ts_init(void)
 script_get_err:
 	return ret;
 }
+#endif
 
 static void __exit sunxi_ts_exit(void)
 {

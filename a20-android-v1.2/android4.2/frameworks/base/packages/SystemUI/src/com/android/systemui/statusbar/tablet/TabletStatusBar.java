@@ -88,6 +88,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import android.util.Log;
 
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 public class TabletStatusBar extends BaseStatusBar implements
         InputMethodsPanel.OnHardKeyboardEnabledChangeListener {
     public static final boolean DEBUG = false;
@@ -249,7 +253,23 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.gravity = getStatusBarGravity();
         lp.setTitle("SystemBar");
         lp.packageName = mContext.getPackageName();
-        mWindowManager.addView(sb, lp);
+        //mWindowManager.addView(sb, lp);//tico
+	//tico
+	{
+	try{
+		FileReader fr = new FileReader("/data/showstatusbar.conf");
+		char buf[] = new char[16];
+		if(fr.read(buf)>0){
+			if(buf[0] == 'y'){
+				//show status bar
+				mWindowManager.addView(sb, lp);
+			}
+		}
+		fr.close();
+	}catch(FileNotFoundException e){
+	}catch(IOException ioe){
+	}
+	}
     }
 
     protected void addPanelWindows() {

@@ -1,4 +1,5 @@
 import init.sun7i.usb.rc
+#import /data/local.rc
 
 on early-init
 	export EXTERNAL_STORAGE /mnt/sdcard
@@ -53,7 +54,8 @@ on fs
 on boot
 
 	#insmod key & tp driver
-	insmod /system/vendor/modules/gslX680.ko
+	#insmod /system/vendor/modules/gslX680.ko
+	insmod /system/vendor/modules/sunxi-ts.ko
 
   #insmod gsensor
   insmod /system/vendor/modules/bma250.ko
@@ -78,7 +80,30 @@ on boot
     insmod /system/vendor/modules/rtl8150.ko
     insmod /system/vendor/modules/cdc_ether.ko
 
+#enable ttyS* for user access
+    chmod 666 /dev/ttyS0
+    chmod 666 /dev/ttyS1
+    chmod 666 /dev/ttyS2
+    chmod 666 /dev/ttyS3
+    chmod 666 /dev/ttyS4
+    chmod 666 /dev/ttyS5
+    chmod 666 /dev/ttyS6
+    chmod 666 /dev/ttyS7
 
+#enable PI13 as output, default set it to high
+    chmod 666 /sys/class/gpio/export
+#   echo 214 > /sys/class/gpio/export
+    write /sys/class/gpio/export 214
+    chmod 666 /sys/class/gpio/gpio214/direction
+    chmod 666 /sys/class/gpio/gpio214/value
+#   echo "high" > /sys/class/gpio/gpio214/direction
+    write /sys/class/gpio/gpio214/direction "high"
+#   echo 1 > /sys/class/gpio/gpio214/value
+    write /sys/class/gpio/gpio214/value 1
+
+# easycap module
+    insmod /system/vendor/modules/easycap.ko bars=0
+	
 
 # 1. realtek wifi service
 # 1.1 realtek wifi sta service
@@ -137,4 +162,10 @@ service p2p_supplicant /system/bin/wpa_supplicant \
 #    group bluetooth net_bt_admin misc
 #    disabled
 #    oneshot
+
+# call user init
+service localrc /data/local.rc
+    oneshot
+
+
 
