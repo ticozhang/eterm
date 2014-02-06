@@ -40,16 +40,16 @@ public class LauncherSurfaceView extends SurfaceView implements
 		System.loadLibrary("ImageProc");
 	}
 
-	public LauncherSurfaceView(Context paramContext) {
-		super(paramContext);
+	public LauncherSurfaceView(Context context) {
+		super(context);
 		
 		this.holder = getHolder();
 		this.holder.addCallback(this);
 	}
 
-	public LauncherSurfaceView(Context paramContext,
-			AttributeSet paramAttributeSet) {
-		super(paramContext, paramAttributeSet);
+	public LauncherSurfaceView(Context context,
+			AttributeSet attri) {
+		super(context, attri);
 
 		this.holder = getHolder();
 		this.holder.addCallback(this);
@@ -148,11 +148,11 @@ public class LauncherSurfaceView extends SurfaceView implements
 		setLayoutParams(layoutParams);
 	}
 
-	public void surfaceChanged(SurfaceHolder paramSurfaceHolder, int paramInt1,
-			int paramInt2, int paramInt3) {
+	public void surfaceChanged(SurfaceHolder holder, int format,
+			int width, int height) {
 	}
 
-	public void surfaceCreated(SurfaceHolder paramSurfaceHolder) {
+	public void surfaceCreated(SurfaceHolder holder) {
 		if (bitmap == null) {
 			bitmap = Bitmap.createBitmap(IMG_WIDTH, IMG_HEIGHT,
 					Bitmap.Config.ARGB_8888);
@@ -167,7 +167,7 @@ public class LauncherSurfaceView extends SurfaceView implements
 		this.mainloop.start();
 	}
 
-	public void surfaceDestroyed(SurfaceHolder paramSurfaceHolder) {
+	public void surfaceDestroyed(SurfaceHolder holder) {
 		shoudstop = true;
 		while (shoudstop) {
 			try {
