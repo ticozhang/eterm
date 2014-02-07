@@ -4,8 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import android.os.Handler;
+import android.os.SystemClock;
 
 public class SerialCommand extends Thread {
 	public static final int CMD_CAPTURE = 100;
@@ -40,13 +45,61 @@ public class SerialCommand extends Thread {
 	public void checkCommand(byte[] cmd) {
 		String str = new String(cmd);
 		if (str.contains("help")) {
-			putMessage("This is a help command line\r\n".getBytes());
+			putMessage("Command List:\r\n".getBytes());
+			putMessage("  capture - start video capture\r\n".getBytes());
+			putMessage("  stop - stop video capture\r\n".getBytes());
+			putMessage("  gettime - get system time\r\n".getBytes());
+			putMessage("  settime yyyy-MM-dd HH:mm:ss zzz - set system time\r\n".getBytes());
 		} else if (str.contains("capture")) {
 			putMessage("Start video capture\r\n".getBytes());
 			cmdHandler.sendEmptyMessage(CMD_CAPTURE);
 		} else if (str.contains("stop")) {
 			putMessage("Stop video capture\r\n".getBytes());
 			cmdHandler.sendEmptyMessage(CMD_STOP_CAPTURE);
+		} else if (str.contains("gettime")) {
+			//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZ");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZ", Locale.US);
+			Date now = new Date();
+			putMessage(("System time is " + sdf.format(now) + "\r\n").getBytes());
+		} else if (str.contains("settime")) {
+			//example: settime 2014-02-08 22:22:00 GMT+08:00
+			//chmod 666 /dev/alarm
+			// ^[\d]{4}[-][\d]{2}[-][\d]{2}[\s]{1}[\d]{2}[:][\d]{2}[:][\d]{2}[\s][A-Za-z]{3}$
+//			String find = "[\\d]{4}[-][\\d]{2}[-][\\d]{2}[\\s]{1}[\\d]{2}[:][\\d]{2}[:][\\d]{2}[\\s][A-Za-z]{3}";
+//			Pattern pattern = Pattern.compile(find);
+//	        Matcher matcher = pattern.matcher(str);
+//	        if(matcher.find()){
+//	        	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
+//				try {
+//					String f = matcher.group();
+//					Date date = df.parse(f);
+//					long epoch = date.getTime();
+//					if(SystemClock.setCurrentTimeMillis(epoch)){
+//						putMessage(("Set time to " + f + " pass\r\n").getBytes());
+//					}else{
+//						putMessage(("Set time to " + f + " fail\r\n").getBytes());
+//					}
+//				} catch (ParseException e) {
+//					putMessage("Format error. Please use yyyy-MM-dd HH:mm:ss zzz \r\n".getBytes());
+//				}
+//			}else{
+//				putMessage("Format error. Please use yyyy-MM-dd HH:mm:ss zzz \r\n".getBytes());
+//			}
+			String sd = str.replace("settime", "");
+			sd = sd.trim();
+			//SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZ");
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZ", Locale.US);
+			try {
+				Date date = df.parse(sd);
+				long epoch = date.getTime();
+				if(SystemClock.setCurrentTimeMillis(epoch)){
+					putMessage(("Set time to " + sd + " pass\r\n").getBytes());
+				}else{
+					putMessage(("Set time to " + sd + " fail\r\n").getBytes());
+				}
+			} catch (ParseException e) {
+				putMessage("Format error. Please use yyyy-MM-dd HH:mm:ss ZZZZ \r\n".getBytes());
+			}
 		} else {
 			putMessage("Unknown command!!!\r\n".getBytes());
 		}
