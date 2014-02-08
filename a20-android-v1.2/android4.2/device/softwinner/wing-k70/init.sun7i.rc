@@ -103,7 +103,9 @@ on boot
 
 # easycap module
     insmod /system/vendor/modules/easycap.ko bars=0
-	
+
+# enable usr access system clock write
+    chmod 666 /dev/alarm	
 
 # 1. realtek wifi service
 # 1.1 realtek wifi sta service
