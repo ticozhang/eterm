@@ -3,6 +3,8 @@ package cn.com.gigaalaser.launcher;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,12 +19,15 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.app.Activity;
+import android.content.Context;
 
 public class MainActivity extends Activity {
 
 	private SerialCommand serialCmd;
 	private CommandHandler handler;
+	private MediaPlayer player;
 
 	OnCaptureButtonClick onCaptureButtonClick;
 
@@ -60,10 +65,25 @@ public class MainActivity extends Activity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//set audio to max volume
+		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		//int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
+		
+		//MediaPlayer
+		player = MediaPlayer.create(this,R.raw.morning);
+		player.setLooping(true);
+		
+		ToggleButton tb = (ToggleButton) findViewById(R.id.button_play);
+		tb.setOnCheckedChangeListener(new OnAudioCheckedChangeListener());
 	}
 	
 	@Override
 	protected void onDestroy() {
+		player.stop();
+		player.release();
 		if (this.serialCmd != null) {
 			this.serialCmd.stopMe();
 			try {
@@ -127,6 +147,20 @@ public class MainActivity extends Activity {
 			}
 		}
 
+	}
+	
+	class OnAudioCheckedChangeListener implements OnCheckedChangeListener {
+
+		@Override
+		public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+			ToggleButton tb = (ToggleButton) findViewById(R.id.button_play);
+			if(tb.isChecked()){
+				player.start();
+			}else{
+				player.stop();
+			}
+		}
+		
 	}
 
 }

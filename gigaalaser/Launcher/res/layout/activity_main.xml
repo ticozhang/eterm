@@ -48,6 +48,12 @@
             android:layout_height="wrap_content"
             android:text="@string/busy" />
 
+        <ToggleButton
+            android:id="@+id/button_play"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/testsound" />
+
         <AnalogClock
             android:id="@+id/clock"
             android:layout_width="wrap_content"

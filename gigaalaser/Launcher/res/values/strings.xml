@@ -8,4 +8,5 @@
     <string name="busy">Busy</string>
     <string name="pal">PAL</string>
     <string name="ntsc">NTSC</string>
+    <string name="testsound">Test Audio</string>
 </resources>
