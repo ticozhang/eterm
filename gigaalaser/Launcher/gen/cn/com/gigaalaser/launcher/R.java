@@ -28,10 +28,10 @@ public final class R {
         public static final int button_play=0x7f090006;
         public static final int button_video_cap=0x7f090001;
         public static final int checkbox_busy=0x7f090005;
-        public static final int clock=0x7f090007;
         public static final int radio_ntsc=0x7f090004;
         public static final int radio_pal=0x7f090003;
         public static final int surfaceview_video=0x7f090000;
+        public static final int time=0x7f090007;
         public static final int videoformat_group=0x7f090002;
     }
     public static final class layout {
@@ -51,6 +51,8 @@ public final class R {
         public static final int hello_world=0x7f060002;
         public static final int ntsc=0x7f060006;
         public static final int pal=0x7f060005;
+        public static final int stopaudio=0x7f060009;
+        public static final int testaudio=0x7f060008;
         public static final int testsound=0x7f060007;
     }
     public static final class style {

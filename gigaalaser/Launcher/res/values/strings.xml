@@ -9,4 +9,6 @@
     <string name="pal">PAL</string>
     <string name="ntsc">NTSC</string>
     <string name="testsound">Test Audio</string>
+    <string name="testaudio">Test Audio</string>
+    <string name="stopaudio">Stop Audio</string>
 </resources>

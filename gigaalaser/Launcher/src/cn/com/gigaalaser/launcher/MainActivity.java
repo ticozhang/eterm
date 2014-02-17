@@ -2,6 +2,12 @@ package cn.com.gigaalaser.launcher;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -18,16 +24,21 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.app.Activity;
 import android.content.Context;
 
 public class MainActivity extends Activity {
+	
+	public final static int UPDATE_TIME = 200;
 
 	private SerialCommand serialCmd;
 	private CommandHandler handler;
 	private MediaPlayer player;
+	
+	private Timer timer;
 
 	OnCaptureButtonClick onCaptureButtonClick;
 
@@ -78,17 +89,34 @@ public class MainActivity extends Activity {
 		
 		ToggleButton tb = (ToggleButton) findViewById(R.id.button_play);
 		tb.setOnCheckedChangeListener(new OnAudioCheckedChangeListener());
+		
+		
+		timer = new Timer();
+		TimerTask task = new TimerTask(){
+	        public void run() {
+//	        	int year = calendar.get(Calendar.YEAR);
+//				int month = calendar.get(Calendar.MONTH) + 1;
+//				int day = calendar.get(Calendar.DAY_OF_MONTH);
+//				int hour = calendar.get(Calendar.HOUR_OF_DAY);
+//				int minute = calendar.get(Calendar.MINUTE);
+//				int second = calendar.get(Calendar.SECOND);
+//				TextView tv = (TextView) findViewById(R.id.time);
+//				tv.setText(""+year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second);
+				handler.sendEmptyMessage(UPDATE_TIME);
+	        }
+	    };
+		timer.schedule(task, 1000, 1000);
 	}
 	
 	@Override
 	protected void onDestroy() {
-		player.stop();
+		//player.stop();
 		player.release();
+		timer.cancel();
 		if (this.serialCmd != null) {
 			this.serialCmd.stopMe();
 			try {
 				this.serialCmd.join();
-
 			} catch (Exception e) {
 
 			}
@@ -167,11 +195,13 @@ public class MainActivity extends Activity {
 
 class CommandHandler extends Handler {
 	WeakReference<MainActivity> activity;
+	//private Calendar calendar;
 
 	CommandHandler(MainActivity activity) {
 		WeakReference<MainActivity> ref = new WeakReference<MainActivity>(
 				activity);
 		this.activity = ref;
+		//calendar = Calendar.getInstance();
 	}
 
 	public void handleMessage(Message msg) {
@@ -189,6 +219,20 @@ class CommandHandler extends Handler {
 			if (bt.getText().equals("Stop")) {
 				act.onCaptureButtonClick.onClick(null);
 			}
+			break;
+		case MainActivity.UPDATE_TIME:
+//			int year = calendar.get(Calendar.YEAR);
+//			int month = calendar.get(Calendar.MONTH) + 1;
+//			int day = calendar.get(Calendar.DAY_OF_MONTH);
+//			int hour = calendar.get(Calendar.HOUR_OF_DAY);
+//			int minute = calendar.get(Calendar.MINUTE);
+//			int second = calendar.get(Calendar.SECOND);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZ", Locale.US);
+			Date now = new Date();
+			
+			TextView tv = (TextView) act.findViewById(R.id.time);
+			//tv.setText(""+year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second);
+			tv.setText(sdf.format(now));
 			break;
 		}
 
