@@ -3,7 +3,6 @@ package cn.com.gigaalaser.launcher;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
@@ -183,9 +182,12 @@ public class MainActivity extends Activity {
 		public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
 			ToggleButton tb = (ToggleButton) findViewById(R.id.button_play);
 			if(tb.isChecked()){
+				AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+				int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+				audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
 				player.start();
 			}else{
-				player.stop();
+				player.pause();
 			}
 		}
 		
